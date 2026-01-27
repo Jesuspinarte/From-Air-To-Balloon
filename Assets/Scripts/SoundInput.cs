@@ -28,22 +28,21 @@ public class SoundInput : MonoBehaviour {
     public string selectedDevice;
 
     [Header("Input Settings")]
-    [Range(0.00001f, 0.001f)]
+    [Tooltip("Number of zero crossings to consider a valid blow.")]
+    public int blowSensitivity = 9;
+    [Range(0.01f, 0.1f)]
     [Tooltip("Minimum volume sensitivity to register audio input.")]
-    public float sensitivity = 0.0001f;
+    public float microphoneSensitivity = 0.03f;
 
     [Header("Force Settings")]
-    [Tooltip("Multiplier for upward force applied to the object based on audio input.")]
-    public float upForceMultiplier = 2;
+    [Tooltip("Damping applied when the object is going up.")]
+    public float upDamping = 2;
     [Tooltip("Damping applied when the object is falling down.")]
     public float downDamping = 2;
-    [Tooltip("Damping applied when the object is going up.")]
-    public float upDamping = 10;
+    [Tooltip("Multiplier for upward force applied to the object based on audio input.")]
+    public float upForceMultiplier = 10;
     [Tooltip("Constant horizontal force applied to the object.")]
     public float horizontalForce = 150f;
-
-    // TODO: Option to select microphone from available devices
-    // private string[] microphones;
 
     void Start() {
         rb = GetComponent<Rigidbody>();
@@ -51,19 +50,20 @@ public class SoundInput : MonoBehaviour {
 
         if (Microphone.devices.Length > 0) {
             selectedDevice = Microphone.devices[0]; // Select the first available microphone
-            audioSource.clip = Microphone.Start(selectedDevice, true, 1, AudioSettings.outputSampleRate);
+            //audioSource.clip = Microphone.Start(selectedDevice, true, 1, AudioSettings.outputSampleRate);
+            audioSource.clip = Microphone.Start(selectedDevice, true, 10, 44100);
             audioSource.loop = true;
 
-            while (!(Microphone.GetPosition(selectedDevice) > 0)) {
-                audioSource.Play();
-            }
+            while (!(Microphone.GetPosition(selectedDevice) > 0)) { }
+            
+            audioSource.Play();
         } else {
             Debug.LogWarning("No microphone devices found.");
         }
     }
 
     void Update() {
-        getOutputData();
+        getAirInput();
     }
 
     private void FixedUpdate() {
@@ -88,21 +88,25 @@ public class SoundInput : MonoBehaviour {
         }
     }
 
-    /**
-     * Checks the audio output data from the microphone and calculates the average volume.
-     */
-    private void getOutputData() {
-        float values = 0f;
+    private void getAirInput() {
+        float volume = 0f;
+        int ceroCrossings = 0;
         audioSource.GetOutputData(samples, 0);
 
-        for (int i = 0; i < RATE; ++i) {
-            values += Mathf.Abs(samples[i]);
+        for (int i = 0; i < RATE - 1; ++i) {
+            volume += Mathf.Abs(samples[i]);
+            if ((samples[i] > 0 && samples[i + 1] <= 0) || (samples[i] < 0 && samples[i + 1] > 0)) {
+                ++ceroCrossings;
+            }
         }
 
-        values /= (float)RATE;
+        float averageVolume = volume / (float)RATE;
 
-        if (values > sensitivity) inputVolume = values;
-        else inputVolume = 0;
+        if (averageVolume > microphoneSensitivity && ceroCrossings > blowSensitivity) {
+            inputVolume = averageVolume;
+        } else {
+            inputVolume = 0f;
+        }
     }
 
 }

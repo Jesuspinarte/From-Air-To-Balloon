@@ -338,10 +338,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   inputVolume: 0
   selectedDevice: 
-  sensitivity: 0.0001
-  upForceMultiplier: 8
-  downDamping: 5
-  upDamping: 12
+  blowSensitivity: 9
+  microphoneSensitivity: 0.03
+  upDamping: 2
+  downDamping: 2
+  upForceMultiplier: 10
   horizontalForce: 150
 --- !u!82 &402516304
 AudioSource:
@@ -853,7 +854,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!65 &2043430407
 BoxCollider:
   m_ObjectHideFlags: 0
