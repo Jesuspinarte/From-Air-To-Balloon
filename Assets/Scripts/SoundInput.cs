@@ -6,6 +6,9 @@ using UnityEngine;
  * GIST: https://gist.github.com/RFullum/a1bee89fc289572e0d7bc5d2d533bde8
  * Youtube: https://www.youtube.com/watch?v=faQEKUvc7MY
  * 
+ * To understand rigidbody movement I watched:
+ * YouTube: https://www.youtube.com/watch?v=tNtOcDryKv4
+ * 
  * The damp solution for Rigidbody was used from this source:
  * Youtube: https://www.youtube.com/watch?v=2M8uxUfi6jI
  * 
@@ -14,29 +17,30 @@ using UnityEngine;
 
 [RequireComponent(typeof(AudioSource))]
 public class SoundInput : MonoBehaviour {
-    [Header("Debug Info")]
-    public float inputVolume = 0f; // Debug variable
-    public static float[] samples = new float[RATE]; // Sample rate
-
     private Rigidbody rb;
     private AudioSource audioSource;
     private const int RATE = 128;
+    private float[] samples = new float[RATE]; // Sample rate
 
-    [Header("Input Settings")]
+    [Header("Debug Info")]
+    public float inputVolume = 0f; // Debug variable
     [Tooltip("Selected microphone device from available devices. Usually, the one your system select by default.")]
     public string selectedDevice;
+
+    [Header("Input Settings")]
     [Range(0.00001f, 0.001f)]
     [Tooltip("Minimum volume sensitivity to register audio input.")]
     public float sensitivity = 0.0001f;
 
-    [Header("Transform Settings")]
+    [Header("Force Settings")]
     [Tooltip("Multiplier for upward force applied to the object based on audio input.")]
     public float upForceMultiplier = 2;
-
+    [Tooltip("Damping applied when the object is falling down.")]
     public float downDamping = 2;
+    [Tooltip("Damping applied when the object is going up.")]
     public float upDamping = 10;
-
-    public float horizontalSpeed = 500f;
+    [Tooltip("Constant horizontal force applied to the object.")]
+    public float horizontalForce = 150f;
 
     // TODO: Option to select microphone from available devices
     // private string[] microphones;
@@ -64,9 +68,10 @@ public class SoundInput : MonoBehaviour {
 
     private void FixedUpdate() {
         // Fixed horizontal movement
-        //rb.AddForce(transform.right * horizontalSpeed);
         onAudioInput();
-        rb.linearVelocity = new Vector3(horizontalSpeed * Time.fixedDeltaTime, rb.linearVelocity.y, 0);
+        if (transform.position.y > 2) {
+            rb.linearVelocity = new Vector3(horizontalForce * Time.fixedDeltaTime, rb.linearVelocity.y, 0);
+        }
     }
 
     /**
@@ -75,7 +80,7 @@ public class SoundInput : MonoBehaviour {
      * It won't be 0 to avoid an aggressive fall.
      */
     private void onAudioInput() {
-        if (inputVolume > 0 && transform.position.y < 14f) {
+        if (inputVolume > 0 && transform.position.y < 14f) { // Top limit
             rb.linearDamping = upDamping;
             rb.AddForce(0, upForceMultiplier, 0, ForceMode.Impulse);
         } else {
