@@ -13,6 +13,10 @@ using UnityEngine;
  * Youtube: https://www.youtube.com/watch?v=2M8uxUfi6jI
  * 
  * Color palette: https://lospec.com/palette-list/campfire-gb
+ * 
+ * Tested with the following microphone: Microphone (F Series Stereo Track Usb Audio) boom microphone.
+ * 
+ * A mixer was added to the audio source to prevent the microphone audio from being played on the speakers.
  */
 
 [RequireComponent(typeof(AudioSource))]
@@ -23,7 +27,8 @@ public class SoundInput : MonoBehaviour {
     private float[] samples = new float[RATE]; // Sample rate
 
     [Header("Debug Info")]
-    public float inputVolume = 0f; // Debug variable
+    public int _zeroCrossings = 0; // Debug variable
+    public float _inputVolume = 0f; // Debug variable
     [Tooltip("Selected microphone device from available devices. Usually, the one your system select by default.")]
     public string selectedDevice;
 
@@ -43,6 +48,10 @@ public class SoundInput : MonoBehaviour {
     public float upForceMultiplier = 10;
     [Tooltip("Constant horizontal force applied to the object.")]
     public float horizontalForce = 150f;
+    [Tooltip("Maximum height limit for the balloon.")]
+    public float topLimit = 14f;
+    [Tooltip("Minimum height limit for the balloon.")]
+    public float bottomLimit = 2f;
 
     void Start() {
         rb = GetComponent<Rigidbody>();
@@ -50,7 +59,6 @@ public class SoundInput : MonoBehaviour {
 
         if (Microphone.devices.Length > 0) {
             selectedDevice = Microphone.devices[0]; // Select the first available microphone
-            //audioSource.clip = Microphone.Start(selectedDevice, true, 1, AudioSettings.outputSampleRate);
             audioSource.clip = Microphone.Start(selectedDevice, true, 10, 44100);
             audioSource.loop = true;
 
@@ -67,9 +75,9 @@ public class SoundInput : MonoBehaviour {
     }
 
     private void FixedUpdate() {
-        // Fixed horizontal movement
         onAudioInput();
-        if (transform.position.y > 2) {
+        // Fixed horizontal movement
+        if (transform.position.y > bottomLimit) {
             rb.linearVelocity = new Vector3(horizontalForce * Time.fixedDeltaTime, rb.linearVelocity.y, 0);
         }
     }
@@ -80,7 +88,7 @@ public class SoundInput : MonoBehaviour {
      * It won't be 0 to avoid an aggressive fall.
      */
     private void onAudioInput() {
-        if (inputVolume > 0 && transform.position.y < 14f) { // Top limit
+        if (_inputVolume > 0 && transform.position.y < topLimit) {
             rb.linearDamping = upDamping;
             rb.AddForce(0, upForceMultiplier, 0, ForceMode.Impulse);
         } else {
@@ -88,25 +96,35 @@ public class SoundInput : MonoBehaviour {
         }
     }
 
+    /**
+     * Analyzes the audio input to determine volume and zero crossings.
+     * Sets _inputVolume and _zeroCrossings based on sensitivity thresholds.
+     */
     private void getAirInput() {
-        float volume = 0f;
-        int ceroCrossings = 0;
         audioSource.GetOutputData(samples, 0);
 
+        float volume = 0f;
+        int zeroCrossings = 0;
+
         for (int i = 0; i < RATE - 1; ++i) {
+            float currentPos = samples[i];
+            float nextPos = samples[i + 1];
+
             volume += Mathf.Abs(samples[i]);
-            if ((samples[i] > 0 && samples[i + 1] <= 0) || (samples[i] < 0 && samples[i + 1] > 0)) {
-                ++ceroCrossings;
+
+            if ((currentPos > 0 && nextPos <= 0) || (currentPos < 0 && nextPos > 0)) {
+                ++zeroCrossings;
             }
         }
 
         float averageVolume = volume / (float)RATE;
 
-        if (averageVolume > microphoneSensitivity && ceroCrossings > blowSensitivity) {
-            inputVolume = averageVolume;
+        if (averageVolume > microphoneSensitivity && zeroCrossings > blowSensitivity) {
+            _inputVolume = averageVolume;
+            _zeroCrossings = zeroCrossings;
         } else {
-            inputVolume = 0f;
+            _inputVolume = 0f;
+            _zeroCrossings = 0;
         }
     }
-
 }
