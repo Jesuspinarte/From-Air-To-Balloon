@@ -271,8 +271,9 @@ GameObject:
   - component: {fileID: 402516304}
   - component: {fileID: 402516303}
   - component: {fileID: 402516309}
+  - component: {fileID: 402516310}
   m_Layer: 0
-  m_Name: Sphere
+  m_Name: Balloon
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -293,9 +294,10 @@ MonoBehaviour:
   inputVolume: 0
   selectedDevice: 
   sensitivity: 0.0001
-  upForceMultiplier: 2
-  downDamping: 2
+  upForceMultiplier: 8
+  downDamping: 5
   upDamping: 15
+  horizontalSpeed: 150
 --- !u!82 &402516304
 AudioSource:
   m_ObjectHideFlags: 0
@@ -507,8 +509,22 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 0
+  m_Constraints: 112
   m_CollisionDetection: 1
+--- !u!114 &402516310
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 402516302}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc5efba2c6c50ad4ebc5ea1059c6aa6f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  forceMultiplier: 500
+  rb: {fileID: 0}
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0

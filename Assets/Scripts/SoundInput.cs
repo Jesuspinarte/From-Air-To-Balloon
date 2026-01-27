@@ -36,6 +36,8 @@ public class SoundInput : MonoBehaviour {
     public float downDamping = 2;
     public float upDamping = 10;
 
+    public float horizontalSpeed = 500f;
+
     // TODO: Option to select microphone from available devices
     // private string[] microphones;
 
@@ -58,7 +60,13 @@ public class SoundInput : MonoBehaviour {
 
     void Update() {
         getOutputData();
+    }
+
+    private void FixedUpdate() {
+        // Fixed horizontal movement
+        //rb.AddForce(transform.right * horizontalSpeed);
         onAudioInput();
+        rb.linearVelocity = new Vector3(horizontalSpeed * Time.fixedDeltaTime, rb.linearVelocity.y, 0);
     }
 
     /**
