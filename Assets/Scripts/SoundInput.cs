@@ -17,6 +17,8 @@ using UnityEngine;
  * Tested with the following microphone: Microphone (F Series Stereo Track Usb Audio) boom microphone.
  * 
  * A mixer was added to the audio source to prevent the microphone audio from being played on the speakers.
+ * 
+ * Air balloon taken from: https://assetstore.unity.com/packages/3d/vehicles/air/underpoly-free-hot-air-balloons-257931
  */
 
 [RequireComponent(typeof(AudioSource))]
