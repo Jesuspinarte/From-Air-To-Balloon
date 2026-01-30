@@ -24,6 +24,7 @@ using UnityEngine;
  * ASSETS:
  * Air balloon taken from: https://assetstore.unity.com/packages/3d/vehicles/air/underpoly-free-hot-air-balloons-257931
  * Environment taken from: https://www.fab.com/listings/ea7f5167-a797-45fe-96d4-efb9f3aecc20
+ * VFX taken from: https://assetstore.unity.com/packages/vfx/particles/fire-explosions/vfx-urp-fire-package-305098
  */
 
 [RequireComponent(typeof(AudioSource))]
