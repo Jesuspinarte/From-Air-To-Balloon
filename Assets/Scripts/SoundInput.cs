@@ -44,7 +44,7 @@ public class SoundInput : MonoBehaviour {
     [Header("Input Settings")]
     [Tooltip("Number of zero crossings to consider a valid blow.")]
     public int blowSensitivity = 9;
-    [Range(0.01f, 0.1f)]
+    [Range(0.001f, 0.1f)]
     [Tooltip("Minimum volume sensitivity to register audio input.")]
     public float microphoneSensitivity = 0.03f;
 
