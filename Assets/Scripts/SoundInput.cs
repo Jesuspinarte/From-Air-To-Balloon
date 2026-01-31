@@ -42,13 +42,6 @@ public class SoundInput : MonoBehaviour {
     [Tooltip("Selected microphone device from available devices. Usually, the one your system select by default.")]
     public string selectedDevice;
 
-    [Header("Input Settings")]
-    [Tooltip("Number of zero crossings to consider a valid blow.")]
-    public int blowSensitivity = 9;
-    [Range(0.001f, 0.1f)]
-    [Tooltip("Minimum volume sensitivity to register audio input.")]
-    public float microphoneSensitivity = 0.03f;
-
     void Start() {
         rb = GetComponent<Rigidbody>();
         audioSource = GetComponent<AudioSource>();
@@ -59,7 +52,7 @@ public class SoundInput : MonoBehaviour {
             audioSource.loop = true;
 
             while (!(Microphone.GetPosition(selectedDevice) > 0)) { }
-            
+
             audioSource.Play();
         } else {
             Debug.LogWarning("No microphone devices found.");
@@ -67,6 +60,8 @@ public class SoundInput : MonoBehaviour {
     }
 
     void Update() {
+        if (GameManager.Instance.gameStarted == false) return;
+
         getAirInput();
     }
 
@@ -93,7 +88,7 @@ public class SoundInput : MonoBehaviour {
 
         float averageVolume = volume / (float)RATE;
 
-        if (averageVolume > microphoneSensitivity && zeroCrossings > blowSensitivity) {
+        if (averageVolume > GameManager.Instance.microphoneSensitivity && zeroCrossings > GameManager.Instance.blowSensitivity) {
             _inputVolume = averageVolume;
             _zeroCrossings = zeroCrossings;
             isGoingUp = true;

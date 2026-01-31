@@ -11,6 +11,8 @@ public class CameraMovement : MonoBehaviour {
     }
 
     void Update() {
+        if (GameManager.Instance.gameStarted == false) return;
+
         if (balloon != null) {
             Vector3 newPosition = transform.position;
 

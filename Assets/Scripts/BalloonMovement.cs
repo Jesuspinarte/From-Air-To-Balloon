@@ -35,7 +35,9 @@ public class BalloonMovement : MonoBehaviour {
     }
 
     private void FixedUpdate() {
-       OnAudioInput();
+        if (GameManager.Instance.gameStarted == false) return;
+
+        OnAudioInput();
 
         // Fixed horizontal movement
         if (transform.position.y > bottomLimit) {
