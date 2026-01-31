@@ -5,6 +5,10 @@ public class GameManager : MonoBehaviour {
 
     [Header("Game Settings")]
     public bool gameStarted = false;
+    public bool gameFinished = false;
+
+    [Header("References")]
+    public Transform gameCamera;
 
     /**
      * Setting the values here to be called from different managers and being used
@@ -21,6 +25,7 @@ public class GameManager : MonoBehaviour {
     public static GameManager Instance {
         get {
             if (_instance == null) {
+                Debug.Log("Creating new GameManager instance.");
                 GameObject go = new GameObject("GameManager");
                 _instance = go.AddComponent<GameManager>();
             }
@@ -33,6 +38,10 @@ public class GameManager : MonoBehaviour {
     }
 
     public void OnPlayerWin() {
-        Debug.Log("Player Wins!");  
+        Debug.Log("Player Wins!");
+    }
+
+    public void OnPlayerLose() {
+        Debug.Log("Player Loses!");
     }
 }

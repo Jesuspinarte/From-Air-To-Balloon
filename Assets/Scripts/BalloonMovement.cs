@@ -3,7 +3,10 @@ using UnityEngine;
 public class BalloonMovement : MonoBehaviour {
     [SerializeField]
     [Tooltip("List of VFX Particle for Fire to control")]
-    private ParticleSystem[] vfxList;
+    private ParticleSystem[] fireVfxList;
+    [SerializeField]
+    [Tooltip("List of VFX Particle for Smoke to control")]
+    private ParticleSystem[] smokeVfxList;
 
     private Rigidbody rb;
 
@@ -28,16 +31,20 @@ public class BalloonMovement : MonoBehaviour {
     void Start() {
         rb = GetComponent<Rigidbody>();
 
-        foreach (ParticleSystem vfx in vfxList) {
+        foreach (ParticleSystem vfx in fireVfxList) {
+            ParticleSystem.EmissionModule emission = vfx.emission;
+            emission.enabled = false;
+        }
+
+        foreach (ParticleSystem vfx in smokeVfxList) {
             ParticleSystem.EmissionModule emission = vfx.emission;
             emission.enabled = false;
         }
     }
 
     private void FixedUpdate() {
-        if (GameManager.Instance.gameStarted == false) return;
-
-        OnAudioInput();
+        if (!GameManager.Instance.gameStarted) return;
+        if (!GameManager.Instance.gameFinished) OnAudioInput();
 
         // Fixed horizontal movement
         if (transform.position.y > bottomLimit) {
@@ -59,9 +66,27 @@ public class BalloonMovement : MonoBehaviour {
         }
 
         // Enable fire VFX when going up
-        foreach (ParticleSystem vfx in vfxList) {
+        foreach (ParticleSystem vfx in fireVfxList) {
             ParticleSystem.EmissionModule emission = vfx.emission;
             emission.enabled = SoundInput.isGoingUp;
+        }
+    }
+
+    /**
+     * Handles the logic when the player loses the game.
+     * Disables fire VFX and enables smoke VFX to indicate failure.
+     */
+    public void PlayerLoses() {
+        GameManager.Instance.gameFinished = true;
+
+        foreach (ParticleSystem vfx in fireVfxList) {
+            ParticleSystem.EmissionModule emission = vfx.emission;
+            emission.enabled = false;
+        }
+
+        foreach (ParticleSystem vfx in smokeVfxList) {
+            ParticleSystem.EmissionModule emission = vfx.emission;
+            emission.enabled = true;
         }
     }
 }

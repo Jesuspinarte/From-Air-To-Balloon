@@ -60,7 +60,8 @@ public class SoundInput : MonoBehaviour {
     }
 
     void Update() {
-        if (GameManager.Instance.gameStarted == false) return;
+        if (!GameManager.Instance.gameStarted) return;
+        if (GameManager.Instance.gameFinished) return;
 
         getAirInput();
     }

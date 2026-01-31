@@ -12,6 +12,7 @@ public class MenuController : MonoBehaviour {
     public GameObject mainMenuText;
     public GameObject opttionsPanel;
     public GameObject startText;
+    public GameObject titleText;
 
     [Header("Audio Settings")]
     public Slider micSensitivityValue;
@@ -20,7 +21,6 @@ public class MenuController : MonoBehaviour {
     public TextMeshProUGUI blowTextValue;
 
     [Header("Camear Settings")]
-    public Transform gameCamera;
     public Transform menuCameraTransform;
     public Transform gameCameraTransform;
     public float zoomSpeed = 2f;
@@ -39,14 +39,16 @@ public class MenuController : MonoBehaviour {
         micSensitivityValue.maxValue = 0.1f;
         micSensitivityValue.value = GameManager.Instance.microphoneSensitivity;
         micSensitivityValue.wholeNumbers = false;
+        micTextValue.text = micSensitivityValue.value.ToString("F3");
 
         blowSensitivityValue.minValue = 1;
         blowSensitivityValue.maxValue = RATE;
         blowSensitivityValue.value = GameManager.Instance.blowSensitivity;
         blowSensitivityValue.wholeNumbers = true;
+        blowTextValue.text = ((int)blowSensitivityValue.value).ToString();
 
-        gameCamera.position = menuCameraTransform.position;
-        gameCamera.rotation = menuCameraTransform.rotation;
+        GameManager.Instance.gameCamera.position = menuCameraTransform.position;
+        GameManager.Instance.gameCamera.rotation = menuCameraTransform.rotation;
 
         GameManager.Instance.gameStarted = false;
         setupDone = true;
@@ -74,6 +76,8 @@ public class MenuController : MonoBehaviour {
      * Smoothly zooms the camera from menu position to game position when the game starts.
      */
     private void FixedUpdate() {
+        Transform gameCamera = GameManager.Instance.gameCamera;
+
         if (!isMenuActive && !GameManager.Instance.gameStarted) {
             gameCamera.position = Vector3.Lerp(gameCamera.position, gameCameraTransform.position, Time.deltaTime * zoomSpeed);
             gameCamera.rotation = Quaternion.Lerp(gameCamera.rotation, gameCameraTransform.rotation, Time.deltaTime * zoomSpeed);
@@ -85,6 +89,7 @@ public class MenuController : MonoBehaviour {
 
         mainMenuText.SetActive(false);
         opttionsPanel.SetActive(false);
+        titleText.SetActive(false);
 
         StartCoroutine(UnlockPlayer());
     }
@@ -107,10 +112,12 @@ public class MenuController : MonoBehaviour {
      * Waits for 1 second before unlocking the player controls to avoid accidental input.
      * Otherwise, the camera zoom will have undesired movements with the player movement because
      * the camera is moving with the balloon.
+     * It also starts the bird spawning process.
      */
     private IEnumerator UnlockPlayer() {
         yield return new WaitForSeconds(1.5f);
         GameManager.Instance.gameStarted = true;
+        BirdGenerator.Instance.StartSpawning();
 
         if (startText != null) startText.SetActive(true);
     }
