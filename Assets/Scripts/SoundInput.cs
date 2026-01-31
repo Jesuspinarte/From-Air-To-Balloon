@@ -17,10 +17,20 @@ using UnityEngine;
  * Tested with the following microphone: Microphone (F Series Stereo Track Usb Audio) boom microphone.
  * 
  * A mixer was added to the audio source to prevent the microphone audio from being played on the speakers.
+ * 
+ * FOG:
+ * Window -> Rendering -> Lighting -> Environment -> Fog
+ * 
+ * ASSETS:
+ * Air balloon taken from: https://assetstore.unity.com/packages/3d/vehicles/air/underpoly-free-hot-air-balloons-257931
+ * Environment taken from: https://www.fab.com/listings/ea7f5167-a797-45fe-96d4-efb9f3aecc20
+ * VFX taken from: https://assetstore.unity.com/packages/vfx/particles/fire-explosions/vfx-urp-fire-package-305098
  */
 
 [RequireComponent(typeof(AudioSource))]
 public class SoundInput : MonoBehaviour {
+    public static bool isGoingUp = false;
+
     private Rigidbody rb;
     private AudioSource audioSource;
     private const int RATE = 128;
@@ -32,27 +42,6 @@ public class SoundInput : MonoBehaviour {
     [Tooltip("Selected microphone device from available devices. Usually, the one your system select by default.")]
     public string selectedDevice;
 
-    [Header("Input Settings")]
-    [Tooltip("Number of zero crossings to consider a valid blow.")]
-    public int blowSensitivity = 9;
-    [Range(0.01f, 0.1f)]
-    [Tooltip("Minimum volume sensitivity to register audio input.")]
-    public float microphoneSensitivity = 0.03f;
-
-    [Header("Force Settings")]
-    [Tooltip("Damping applied when the object is going up.")]
-    public float upDamping = 2;
-    [Tooltip("Damping applied when the object is falling down.")]
-    public float downDamping = 2;
-    [Tooltip("Multiplier for upward force applied to the object based on audio input.")]
-    public float upForceMultiplier = 10;
-    [Tooltip("Constant horizontal force applied to the object.")]
-    public float horizontalForce = 150f;
-    [Tooltip("Maximum height limit for the balloon.")]
-    public float topLimit = 14f;
-    [Tooltip("Minimum height limit for the balloon.")]
-    public float bottomLimit = 2f;
-
     void Start() {
         rb = GetComponent<Rigidbody>();
         audioSource = GetComponent<AudioSource>();
@@ -63,7 +52,7 @@ public class SoundInput : MonoBehaviour {
             audioSource.loop = true;
 
             while (!(Microphone.GetPosition(selectedDevice) > 0)) { }
-            
+
             audioSource.Play();
         } else {
             Debug.LogWarning("No microphone devices found.");
@@ -71,29 +60,10 @@ public class SoundInput : MonoBehaviour {
     }
 
     void Update() {
+        if (!GameManager.Instance.gameStarted) return;
+        if (GameManager.Instance.gameFinished) return;
+
         getAirInput();
-    }
-
-    private void FixedUpdate() {
-        onAudioInput();
-        // Fixed horizontal movement
-        if (transform.position.y > bottomLimit) {
-            rb.linearVelocity = new Vector3(horizontalForce * Time.fixedDeltaTime, rb.linearVelocity.y, 0);
-        }
-    }
-
-    /**
-     * Applies upward force to the object based on audio input volume.
-     * Changes the air resistance (linear damping), will be higher when going up and lower when falling down.
-     * It won't be 0 to avoid an aggressive fall.
-     */
-    private void onAudioInput() {
-        if (_inputVolume > 0 && transform.position.y < topLimit) {
-            rb.linearDamping = upDamping;
-            rb.AddForce(0, upForceMultiplier, 0, ForceMode.Impulse);
-        } else {
-            rb.linearDamping = downDamping;
-        }
     }
 
     /**
@@ -119,12 +89,14 @@ public class SoundInput : MonoBehaviour {
 
         float averageVolume = volume / (float)RATE;
 
-        if (averageVolume > microphoneSensitivity && zeroCrossings > blowSensitivity) {
+        if (averageVolume > GameManager.Instance.microphoneSensitivity && zeroCrossings > GameManager.Instance.blowSensitivity) {
             _inputVolume = averageVolume;
             _zeroCrossings = zeroCrossings;
+            isGoingUp = true;
         } else {
             _inputVolume = 0f;
             _zeroCrossings = 0;
+            isGoingUp = false;
         }
     }
 }

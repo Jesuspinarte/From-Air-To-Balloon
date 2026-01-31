@@ -10,7 +10,12 @@ public class CameraMovement : MonoBehaviour {
 
     }
 
+    /**
+     * Follows the balloon on the X axis with a defined offset.
+     */
     void Update() {
+        if (GameManager.Instance.gameStarted == false) return;
+
         if (balloon != null) {
             Vector3 newPosition = transform.position;
 
