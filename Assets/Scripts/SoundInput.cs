@@ -31,7 +31,6 @@ using UnityEngine;
 public class SoundInput : MonoBehaviour {
     public static bool isGoingUp = false;
 
-    private Rigidbody rb;
     private AudioSource audioSource;
     private const int RATE = 128;
     private float[] samples = new float[RATE]; // Sample rate
@@ -43,7 +42,6 @@ public class SoundInput : MonoBehaviour {
     public string selectedDevice;
 
     void Start() {
-        rb = GetComponent<Rigidbody>();
         audioSource = GetComponent<AudioSource>();
 
         if (Microphone.devices.Length > 0) {

@@ -52,6 +52,12 @@ public class BalloonMovement : MonoBehaviour {
         }
     }
 
+    private void OnCollisionEnter(Collision coll) {
+        if (coll.gameObject.CompareTag("Land")) {
+            SoundManager.Instance.PlaySfxSound(FxSoundType.Landing);
+        }
+    }
+
     /**
      * Applies upward force to the object based on audio input volume.
      * Changes the air resistance (linear damping), will be higher when going up and lower when falling down.
@@ -61,8 +67,11 @@ public class BalloonMovement : MonoBehaviour {
         if (SoundInput.isGoingUp && transform.position.y < topLimit) {
             rb.linearDamping = upDamping;
             rb.AddForce(0, upForceMultiplier, 0, ForceMode.Impulse);
+
+            SoundManager.Instance.PlayMovementSound(MovementSoundType.Fire);
         } else {
             rb.linearDamping = downDamping;
+            SoundManager.Instance.StopMovementSound();
         }
 
         // Enable fire VFX when going up
@@ -88,5 +97,9 @@ public class BalloonMovement : MonoBehaviour {
             ParticleSystem.EmissionModule emission = vfx.emission;
             emission.enabled = true;
         }
+    }
+
+    public void PlayerWins() {
+        GameManager.Instance.gameFinished = true;
     }
 }

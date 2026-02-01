@@ -21,7 +21,6 @@ public class BirdGenerator : MonoBehaviour {
     public static BirdGenerator Instance {
         get {
             if (_instance == null) {
-                Debug.Log("Creating new BirdGenerator instance.");
                 GameObject go = new GameObject("BirdGenerator");
                 _instance = go.AddComponent<BirdGenerator>();
             }

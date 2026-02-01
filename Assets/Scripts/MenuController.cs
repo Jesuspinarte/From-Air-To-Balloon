@@ -4,15 +4,25 @@ using UnityEngine.UI;
 
 using UnityEngine.InputSystem;
 using System.Collections;
+using UnityEngine.SceneManagement;
+
+/**
+ * Font used: https://fonts.google.com/specimen/Knewave?preview.text=from%20Air%20to%20Balloon&categoryFilters=Feeling:%2FExpressive%2FPlayful
+ */
 
 public class MenuController : MonoBehaviour {
     private const int RATE = 128;
 
     [Header("Menu Settings")]
-    public GameObject mainMenuText;
-    public GameObject opttionsPanel;
     public GameObject startText;
     public GameObject titleText;
+    public GameObject restartText;
+    public GameObject mainMenuText;
+    public GameObject optionsPanel;
+
+    [Header("OptionsSettings")]
+    public GameObject returnText;
+    public GameObject continueText;
 
     [Header("Audio Settings")]
     public Slider micSensitivityValue;
@@ -27,6 +37,7 @@ public class MenuController : MonoBehaviour {
 
     private bool isMenuActive = true;
     private bool isOptionsActive = false;
+    private bool isPauseActive = false;
 
     /**
      * Flag to avoid OnValueChange events being triggered during setup.
@@ -56,19 +67,54 @@ public class MenuController : MonoBehaviour {
 
     void Update() {
         if (isMenuActive && !isOptionsActive) {
-            if (Keyboard.current.spaceKey.wasPressedThisFrame) StartGame();
+            if (Keyboard.current.spaceKey.wasPressedThisFrame) {
+                SoundManager.Instance.PlaySfxSound(FxSoundType.Click);
+                StartGame();
+            }
 
             if (Keyboard.current.oKey.wasPressedThisFrame) {
+                SoundManager.Instance.PlaySfxSound(FxSoundType.Click);
+
                 isOptionsActive = true;
-                opttionsPanel.SetActive(true);
+                returnText.SetActive(true);
+                optionsPanel.SetActive(true);
+                continueText.SetActive(false);
                 mainMenuText.SetActive(false);
             }
         } else if (isOptionsActive) {
             if (Keyboard.current.spaceKey.wasPressedThisFrame) {
+                SoundManager.Instance.PlaySfxSound(FxSoundType.Click);
+
                 isOptionsActive = false;
-                opttionsPanel.SetActive(false);
+                returnText.SetActive(false);
+                optionsPanel.SetActive(false);
                 mainMenuText.SetActive(true);
             }
+        } else if (isPauseActive) {
+            if (Keyboard.current.oKey.wasPressedThisFrame) {
+                SoundManager.Instance.PlaySfxSound(FxSoundType.Click);
+
+                isPauseActive = false;
+                restartText.SetActive(true);
+                optionsPanel.SetActive(false);
+                Time.timeScale = 1f;
+            }
+        } else {
+            if (Keyboard.current.oKey.wasPressedThisFrame) {
+                SoundManager.Instance.PlaySfxSound(FxSoundType.Click);
+
+                isPauseActive = true;
+                returnText.SetActive(false);
+                continueText.SetActive(true);
+                optionsPanel.SetActive(true);
+                restartText.SetActive(false);
+                Time.timeScale = 0f;
+            }
+        }
+
+        if (Keyboard.current.rKey.wasPressedThisFrame) {
+            SoundManager.Instance.PlaySfxSound(FxSoundType.Click);
+            RestartGame();
         }
     }
 
@@ -88,10 +134,15 @@ public class MenuController : MonoBehaviour {
         isMenuActive = false;
 
         mainMenuText.SetActive(false);
-        opttionsPanel.SetActive(false);
+        optionsPanel.SetActive(false);
         titleText.SetActive(false);
+        restartText.SetActive(true);
 
         StartCoroutine(UnlockPlayer());
+    }
+
+    private void RestartGame() {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     public void OnMicSensitivityChange() {
