@@ -24,8 +24,12 @@ public class BridController : MonoBehaviour {
     private void OnCollisionEnter(Collision coll) {
         if (coll.gameObject.CompareTag("Player")) {
             isDead = true;
+
             GameManager.Instance.OnPlayerLose();
+            SoundManager.Instance.PlaySfxSound(FxSoundType.Crash);
+
             coll.transform.GetComponent<BalloonMovement>().PlayerLoses();
+
             Destroy(gameObject);
         }
     }

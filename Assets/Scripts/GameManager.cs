@@ -10,6 +10,10 @@ public class GameManager : MonoBehaviour {
     [Header("References")]
     public Transform gameCamera;
 
+    [Header("Game Titles")]
+    public GameObject winTitle;
+    public GameObject loseTitle;
+
     /**
      * Setting the values here to be called from different managers and being used
      * accross the game. In this case we are only using it in the SoundInput script but
@@ -25,7 +29,6 @@ public class GameManager : MonoBehaviour {
     public static GameManager Instance {
         get {
             if (_instance == null) {
-                Debug.Log("Creating new GameManager instance.");
                 GameObject go = new GameObject("GameManager");
                 _instance = go.AddComponent<GameManager>();
             }
@@ -38,10 +41,18 @@ public class GameManager : MonoBehaviour {
     }
 
     public void OnPlayerWin() {
-        Debug.Log("Player Wins!");
+        if (gameFinished) return;
+
+        gameFinished = true;
+        winTitle.SetActive(true);
     }
 
     public void OnPlayerLose() {
-        Debug.Log("Player Loses!");
+        if (gameFinished) return;
+
+        gameFinished = true;
+        loseTitle.SetActive(true);
+
+        SoundManager.Instance.PlayMovementSound(MovementSoundType.Smoke);
     }
 }
